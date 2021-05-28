@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Human Body Partonomy</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://rawcdn.githack.com/Kcnarf/d3-weighted-voronoi/v1.1.0/build/d3-weighted-voronoi.js"></script>
+    <script src="https://rawcdn.githack.com/Kcnarf/d3-voronoi-map/v2.1.0/build/d3-voronoi-map.js"></script>
+    <script src="https://rawcdn.githack.com/Kcnarf/d3-voronoi-treemap/v1.1.1/build/d3-voronoi-treemap.js"></script>
+    <script src="https://unpkg.com/papaparse@5.3.0/papaparse.min.js"></script>
+    <style>
+        .cell {
+            fill: rgba(255, 0, 0, 0.1);
+        }
+
+        .label {
+            text-anchor: middle;
+            fill: black;
+        }
+
+        .label > .name {
+            dominant-baseline: text-after-edge;
+        }
+
+        .label > .id {
+            dominant-baseline: text-before-edge;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <label>Enter a partonomy csv file: <input type="file" name="partonomy_csv"></label>
+</div>
+<div>
+    <label>Select a hierarchy depth: <select name="partonomy_depth"></select></label>
+</div>
+<div>
+    <svg></svg>
+</div>
+
+<script src="index.js"></script>
+</body>
+</html>
