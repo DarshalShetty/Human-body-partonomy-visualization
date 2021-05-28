@@ -49,6 +49,9 @@ fileInput.addEventListener('change', (e) => {
         complete: () => {
             const depth = depthInput.value === "" ? 1 : parseInt(depthInput.value);
             drawVoronoi(hierarchy, depth);
+            while (depthInput.firstChild) {
+                depthInput.removeChild(depthInput.firstChild);
+            }
             [...Array(d3.hierarchy(hierarchy).height-1).keys()].forEach(v=>{
                 const option = document.createElement('option');
                 option.setAttribute('value', v+1);
