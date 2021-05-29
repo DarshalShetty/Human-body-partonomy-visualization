@@ -6,7 +6,7 @@ const height = 800;
 
 const fileInput = document.querySelector('[name="partonomy_csv"]')
 fileInput.addEventListener('change', (e) => {
-    hierarchy = {...initHierarchy};
+    let hierarchy = {...initHierarchy};
     let isRow = false;
     const selectedFile = e.currentTarget.files[0];
     let totalDepth = 0;
@@ -47,89 +47,104 @@ fileInput.addEventListener('change', (e) => {
             }
         },
         complete: () => {
-            const depth = depthInput.value === "" ? 1 : parseInt(depthInput.value);
-            drawVoronoi(hierarchy, depth);
+            let rootNode = d3.hierarchy(hierarchy.children[0]).sum(() => 1); // a d3-hierarchy of your nested data
+            let voronoiTreemap = d3.voronoiTreemap().clip([
+                [0, 0],
+                [0, height],
+                [width, height],
+                [width, 0],
+            ]); // sets the clipping polygon
+            voronoiTreemap(rootNode); // computes the weighted Voronoi tessellation of the d3-hierarchy; assigns a 'polygon' property to each node of the hierarchy
+            allNodes = rootNode.descendants();
+            drawVoronoi(allNodes, 1);
             while (depthInput.firstChild) {
                 depthInput.removeChild(depthInput.firstChild);
             }
-            [...Array(d3.hierarchy(hierarchy).height-1).keys()].forEach(v=>{
+            [...Array(d3.hierarchy(hierarchy).height - 1).keys()].forEach(v => {
                 const option = document.createElement('option');
-                option.setAttribute('value', v+1);
-                option.innerText = v+1;
+                option.setAttribute('value', v + 1);
+                option.innerText = v + 1;
                 depthInput.append(option);
             });
         }
     });
 })
-let hierarchy = {...initHierarchy};
 
 const depthInput = document.querySelector('[name="partonomy_depth"]')
-depthInput.addEventListener('change', (e)=>{
+depthInput.addEventListener('change', (e) => {
     const depth = parseInt(e.currentTarget.value);
-    drawVoronoi(hierarchy, depth);
+    drawVoronoi(allNodes, depth);
 })
 
-function drawVoronoi(hierarchy, depth) {
-    let rootNode = d3.hierarchy(hierarchy.children[0]).sum(() => 1); // a d3-hierarchy of your nested data
+const svg = d3.select('svg').attr('width', width).attr('height', height);
+const voronoiContainer = svg.append('g').classed('cells', true);
+const labelContainer = svg.append("g").classed('labels', true);
+let allNodes = [];
 
-    let voronoiTreemap = d3.voronoiTreemap().clip([
-        [0, 0],
-        [0, height],
-        [width, height],
-        [width, 0],
-    ]); // sets the clipping polygon
-    voronoiTreemap(rootNode); // computes the weighted Voronoi tessellation of the d3-hierarchy; assigns a 'polygon' property to each node of the hierarchy
+function drawVoronoi(allNodes, depth) {
 
-    let allNodes = rootNode.descendants();
+    const voronoiViz = voronoiContainer
+        .selectAll('.cell')
+        .data(allNodes, d => `${d.data.name}|${d.data.id}`);
+    voronoiViz.join(
+        enter =>
+            enter
+                .append('path')
+                .classed('cell', true)
+                .attr('d', function (d) {
+                    // d is a node
+                    return d3.line()(d.polygon) + 'z'; // d.polygon is the computed Voronoï cell encoding the relative weight of your underlying original data
+                })
+                .style("stroke", (d) =>
+                    d.depth === depth ? 'rgb(0, 0, 0)' : 'rgba(0, 0, 0, 0.1)'
+                )
+                .style('stroke-width', function (d) {
+                    const width = d.depth === depth ? 5 : 1;
+                    return `${width}px`;
+                }),
+        update =>
+            update
+                .style("stroke", (d) =>
+                    d.depth === depth ? 'rgb(0, 0, 0)' : 'rgba(0, 0, 0, 0.1)'
+                )
+                .style('stroke-width', function (d) {
+                    const width = d.depth === depth ? 5 : 1;
+                    return `${width}px`;
+                }),
+        exit =>
+            exit.remove()
+    )
 
-    d3.selectAll('svg > *').remove();
-
-    const svg = d3.select('svg').attr('width', width).attr('height', height);
-    const voronoiViz = svg
-        .append('g')
-        .classed('cells', true)
-        .selectAll('cell')
-        .data(allNodes);
-    voronoiViz
-        .enter()
-        .append('path')
-        .classed('cell', true)
-        .attr('d', function (d) {
-            // d is a node
-            return d3.line()(d.polygon) + 'z'; // d.polygon is the computed Voronoï cell encoding the relative weight of your underlying original data
-        })
-        .style("stroke", (d) =>
-            d.depth === depth ? 'rgb(0, 0, 0)' : 'rgba(0, 0, 0, 0.1)'
-        )
-        .style('stroke-width', function (d) {
-            const width = d.depth === depth ? 5 : 1;
-            return `${width}px`;
-        });
-
-    const labels = svg.append("g")
-        .classed('labels', true)
+    const labels = labelContainer
         .selectAll(".label")
-        .data(allNodes.filter(d => d.depth === depth))
-        .enter()
-        .append("g")
-        .classed("label", true)
-        .attr("transform", function (d) {
-            return "translate(" + [d.polygon.site.x, d.polygon.site.y] + ")";
-        })
-        .style("font-size", function (d) {
-            return `${d3.scaleLinear().domain([3, 20]).range([8, 20]).clamp(true)(d.value)}px`;
-        });
+        .data(allNodes.filter(d => d.depth === depth), d => `${d.data.name}|${d.data.id}`)
+        .join(
+            enter => {
+                const l = enter
+                    .append("g")
+                    .classed("label", true)
+                    .attr("transform", function (d) {
+                        return "translate(" + [d.polygon.site.x, d.polygon.site.y] + ")";
+                    })
+                    .style("font-size", function (d) {
+                        return `${d3.scaleLinear().domain([3, 20]).range([8, 20]).clamp(true)(d.value)}px`;
+                    });
+                l.append("text")
+                    .classed("name", true)
+                    .html(function (d) {
+                        return d.data.name;
+                    });
+                l.append("text")
+                    .classed("id", true)
+                    .text(function (d) {
+                        return d.data.id;
+                    });
+                return l;
+            },
+            update => update,
+            exit => exit.remove()
+        );
 
-    labels.append("text")
-        .classed("name", true)
-        .html(function (d) {
-            return d.data.name;
-        });
-    labels.append("text")
-        .classed("id", true)
-        .text(function (d) {
-            return d.data.id;
-        });
 
 }
 
