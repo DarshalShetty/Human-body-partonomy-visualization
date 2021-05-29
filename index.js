@@ -1,12 +1,12 @@
-const initHierarchy = {
-    name: "body"
-};
 const width = 1000;
 const height = 800;
+const leftMargin = (screen.width-width)/2;
 
 const fileInput = document.querySelector('[name="partonomy_csv"]')
 fileInput.addEventListener('change', (e) => {
-    let hierarchy = {...initHierarchy};
+    let hierarchy = {
+        name: "body"
+    };
     let isRow = false;
     const selectedFile = e.currentTarget.files[0];
     let totalDepth = 0;
@@ -76,7 +76,6 @@ depthInput.addEventListener('change', (e) => {
 })
 
 const svg = d3.select('svg').attr('width', "100%").attr('height', height);
-const leftMargin = (screen.width-width)/2;
 const voronoiContainer = svg.append('g').classed('cells', true).attr('transform', `translate(${leftMargin},0)`);
 const labelContainer = svg.append("g").classed('labels', true).attr('transform', `translate(${leftMargin},0)`);
 let allNodes = [];
