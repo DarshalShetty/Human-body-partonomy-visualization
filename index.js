@@ -75,9 +75,10 @@ depthInput.addEventListener('change', (e) => {
     drawVoronoi(allNodes, depth);
 })
 
-const svg = d3.select('svg').attr('width', width).attr('height', height);
-const voronoiContainer = svg.append('g').classed('cells', true);
-const labelContainer = svg.append("g").classed('labels', true);
+const svg = d3.select('svg').attr('width', "100%").attr('height', height);
+const leftMargin = (screen.width-width)/2;
+const voronoiContainer = svg.append('g').classed('cells', true).attr('transform', `translate(${leftMargin},0)`);
+const labelContainer = svg.append("g").classed('labels', true).attr('transform', `translate(${leftMargin},0)`);
 let allNodes = [];
 
 function drawVoronoi(allNodes, depth) {
