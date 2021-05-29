@@ -26,10 +26,12 @@ visualization tool.
 ## Visualization Screenshots
 
 - These are screenshots for the visualizations for the brain partonomy data at
- depths 1 and 3 respectively.
- ![Brain partonomy visualization at depth 1](./brain-partonomy-depth1.png)
- ![Brain partonomy visualization at depth 3](./brain-partonomy-depth3.png)
+ depths 1, 2 and 3 respectively.
+ ![Brain partonomy visualization at depth 1](screenshots/brain-partonomy-depth1.png)
+ ![Brain partonomy visualization at depth 2](screenshots/brain-partonomy-depth2.png)
+ ![Brain partonomy visualization at depth 3](screenshots/brain-partonomy-depth3.png)
 - These are screenshots for the visualizations for the kidney partonomy data at
- depths 1 and 3 respectively.
- ![Kidney partonomy visualization at depth 1](./kidney-partonomy-depth1.png)
- ![Kidney partonomy visualization at depth 3](./kidney-partonomy-depth3.png)
+ depths 1, 2 and 3 respectively.
+ ![Kidney partonomy visualization at depth 1](screenshots/kidney-partonomy-depth1.png)
+ ![Kidney partonomy visualization at depth 2](screenshots/kidney-partonomy-depth2.png)
+ ![Kidney partonomy visualization at depth 3](screenshots/kidney-partonomy-depth3.png)
