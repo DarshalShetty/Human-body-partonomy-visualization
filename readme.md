@@ -4,6 +4,14 @@
 No special instructions. Just clone this repo and open ```index.html``` in any
 browser. (tested with Firefox)
 
+## Usage instructions
+The UI is fairly simple. The file input is used to select csv versions of
+ partonomy sheets from the master table at https://hubmapconsortium.github.io/ccf-asct-reporter/.
+ Example csv files can be found in ```data``` directory.
+ 
+Selecting a number from the drop-down input will highlight and label anatomical
+ structures at that depth number in the hierarchy of the partonomy.
+
 ## Overview
 The project is mostly implemented in vanilla JavaScript using the d3 voronoi
  plugin mentioned in the task description. Another library called ```Papa``` was
