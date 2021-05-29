@@ -16,7 +16,6 @@ fileInput.addEventListener('change', (e) => {
             if (isRow) {
                 let currentNode = hierarchy;
                 for (let j = 0; j < totalDepth; j++) {
-                    let i = j * 3;
                     let name = row[j * 3];
                     let label = row[j * 3 + 1];
                     let id = row[j * 3 + 2];
@@ -91,16 +90,10 @@ function drawVoronoi(allNodes, depth) {
             enter
                 .append('path')
                 .classed('cell', true)
+                .classed('highlight', (d) => d.depth === depth)
                 .attr('d', function (d) {
                     // d is a node
                     return d3.line()(d.polygon) + 'z'; // d.polygon is the computed Voronoï cell encoding the relative weight of your underlying original data
-                })
-                .style("stroke", (d) =>
-                    d.depth === depth ? 'rgb(0, 0, 0)' : 'rgba(0, 0, 0, 0.1)'
-                )
-                .style('stroke-width', function (d) {
-                    const width = d.depth === depth ? 5 : 1;
-                    return `${width}px`;
                 }),
         update =>
             update
@@ -115,7 +108,7 @@ function drawVoronoi(allNodes, depth) {
             exit.remove()
     )
 
-    const labels = labelContainer
+    labelContainer
         .selectAll(".label")
         .data(allNodes.filter(d => d.depth === depth), d => `${d.data.name}|${d.data.id}`)
         .join(

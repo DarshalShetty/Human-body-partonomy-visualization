@@ -11,11 +11,29 @@
     <style>
         .cell {
             fill: rgba(255, 0, 0, 0.1);
+            stroke: rgba(0, 0, 0, 0.1);
+            stroke-width: 1px;
+        }
+
+        .cell.highlight {
+            stroke: black;
+            stroke-width: 5px;
         }
 
         .label {
             text-anchor: middle;
             fill: black;
+        }
+
+        .label:hover {
+            paint-order: stroke;
+            stroke: greenyellow;
+            fill: darkgreen;
+            stroke-width: 1px;
+            stroke-linecap: butt;
+            stroke-linejoin: miter;
+            font-size: 150%;
+            font-weight: bolder;
         }
 
         .label > .name {
