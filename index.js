@@ -1,48 +1,95 @@
 const width = 1000;
 const height = 800;
-const leftMargin = (screen.width-width)/2;
+const leftMargin = (screen.width - width) / 2;
 
 const fileInput = document.querySelector('[name="partonomy_csv"]')
 fileInput.addEventListener('change', (e) => {
+    const rootName = 'root';
     let hierarchy = {
-        name: "body"
+        name: rootName
     };
     let isRow = false;
     const selectedFile = e.currentTarget.files[0];
     let totalDepth = 0;
+
+    let isOldFormat = true;
+
+    function stepParseOldFormat(row) {
+        if (isRow) {
+            let currentNode = hierarchy;
+            for (let j = 0; j < totalDepth; j++) {
+                let name = row[j * 3];
+                let label = row[j * 3 + 1];
+                let id = row[j * 3 + 2];
+                if (name === "" && id === "") {
+                    continue;
+                }
+                if (!currentNode.children) {
+                    currentNode.children = [];
+                }
+                //name-id combo considered for uniqueness because names aren't always unique and some rows don't have ID
+                let child = currentNode.children.filter((node) => node.name === name && node.id === id)[0];
+                if (!child) {
+                    child = {name, label, id};
+                    currentNode.children.push(child);
+                }
+                currentNode = child;
+            }
+        }
+        if (row[0] === "AS/1") {
+            isRow = true;
+            for (let header of row) {
+                if (!header.startsWith('AS/')) {
+                    break;
+                }
+                totalDepth++;
+            }
+            totalDepth /= 3;
+        }
+    }
+
+    let depthMap = {}
+
+    let i=0;
+    function stepParseNewFormat(row) {
+        const from = row[0].trim();
+        const to = row[1].trim();
+
+        function walkAndFetch(path, node) {
+            if (path.length === 0) {
+                return node;
+            }
+            return walkAndFetch(path.slice(1), node.children.filter(child => child.name === path[0])[0]);
+        }
+
+        if (!depthMap[from]) {
+            depthMap[from] = [from];
+            if (!hierarchy.children) {
+                hierarchy.children = [];
+            }
+            hierarchy.children.push({name: from});
+        }
+
+        const fromNode = walkAndFetch(depthMap[from], hierarchy);
+        if (!fromNode.children) {
+            fromNode.children = [];
+        }
+        fromNode.children.push({name: to});
+        depthMap[to] = [...depthMap[from], to];
+        console.log(i++);
+    }
+
     Papa.parse(selectedFile, {
+        skipEmptyLines: true,
         step: (results) => {
             let row = results.data;
-            if (isRow) {
-                let currentNode = hierarchy;
-                for (let j = 0; j < totalDepth; j++) {
-                    let name = row[j * 3];
-                    let label = row[j * 3 + 1];
-                    let id = row[j * 3 + 2];
-                    if (name === "" && id === "") {
-                        continue;
-                    }
-                    if (!currentNode.children) {
-                        currentNode.children = [];
-                    }
-                    //name-id combo considered for uniqueness because names aren't always unique and some rows don't have ID
-                    let child = currentNode.children.filter((node) => node.name === name && node.id === id)[0];
-                    if (!child) {
-                        child = {name, label, id};
-                        currentNode.children.push(child);
-                    }
-                    currentNode = child;
-                }
+            if (isOldFormat) {
+                stepParseOldFormat(row);
+            } else {
+                stepParseNewFormat(row);
             }
-            if (row[0] === "AS/1") {
-                isRow = true;
-                for (let header of row) {
-                    if (!header.startsWith('AS/')) {
-                        break;
-                    }
-                    totalDepth++;
-                }
-                totalDepth /= 3;
+            if (row[0] === "FROM") {
+                isOldFormat = false;
             }
         },
         complete: () => {
